@@ -1,0 +1,253 @@
+Learn about the following example made with Terratest. Explain it briefly.
+
+
+
+package test
+
+import (
+	"testing"
+
+	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+// An example of how to test the Terraform module in examples/terraform-aws-network-example using Terratest.
+func TestTerraformAwsNetworkExample(t *testing.T) {
+	t.Parallel()
+
+	// Pick a random AWS region to test in. This helps ensure your code works in all regions.
+	awsRegion := aws.GetRandomStableRegion(t, nil, nil)
+
+	// Give the VPC and the subnets correct CIDRs
+	vpcCidr := "10.10.0.0/16"
+	privateSubnetCidr := "10.10.1.0/24"
+	publicSubnetCidr := "10.10.2.0/24"
+
+	// Construct the terraform options with default retryable errors to handle the most common retryable errors in
+	// terraform testing.
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: "../examples/terraform-aws-network-example",
+
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"main_vpc_cidr":       vpcCidr,
+			"private_subnet_cidr": privateSubnetCidr,
+			"public_subnet_cidr":  publicSubnetCidr,
+			"aws_region":          awsRegion,
+		},
+	})
+
+	// At the end of the test, run `terraform destroy` to clean up any resources that were created
+	defer terraform.Destroy(t, terraformOptions)
+
+	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Run `terraform output` to get the value of an output variable
+	publicSubnetId := terraform.Output(t, terraformOptions, "public_subnet_id")
+	privateSubnetId := terraform.Output(t, terraformOptions, "private_subnet_id")
+	vpcId := terraform.Output(t, terraformOptions, "main_vpc_id")
+
+	subnets := aws.GetSubnetsForVpc(t, vpcId, awsRegion)
+
+	require.Equal(t, 2, len(subnets))
+	// Verify if the network that is supposed to be public is really public
+	assert.True(t, aws.IsPublicSubnet(t, publicSubnetId, awsRegion))
+	// Verify if the network that is supposed to be private is really private
+	assert.False(t, aws.IsPublicSubnet(t, privateSubnetId, awsRegion))
+}
+
+Infrastructure:
+
+main.tf:
+
+# ---------------------------------------------------------------------------------------------------------------------
+# PIN TERRAFORM VERSION TO >= 0.12
+# The examples have been upgraded to 0.12 syntax
+# ---------------------------------------------------------------------------------------------------------------------
+
+terraform {
+  # This module is now only being tested with Terraform 0.13.x. However, to make upgrading easier, we are setting
+  # 0.12.26 as the minimum version, as that version added support for required_providers with source URLs, making it
+  # forwards compatible with 0.13.x code.
+  required_version = ">= 0.12.26"
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# DEPLOY A SIMPLE NETWORK
+# The network has an internet gateway and two subnets - private and public - in the same availability zone.
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_vpc" "main" {
+  cidr_block = var.main_vpc_cidr
+
+  tags = {
+    Name = var.tag_name
+  }
+}
+
+resource "aws_internet_gateway" "main_gateway" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = var.tag_name
+  }
+}
+
+resource "aws_subnet" "private" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.private_subnet_cidr
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = var.tag_name
+  }
+
+  availability_zone = data.aws_availability_zones.available.names[0]
+}
+
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.public_subnet_cidr
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = var.tag_name
+  }
+
+  availability_zone = data.aws_availability_zones.available.names[0]
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE AND ATTACH A ROUTING TABLE FOR THE PUBLIC NETWORK
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "91.189.0.0/24"
+    gateway_id = aws_internet_gateway.main_gateway.id
+  }
+
+  tags = {
+    Name = var.tag_name
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE NAT GATEWAY FOR THE PRIVATE SUBNET
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public.id
+  depends_on    = [aws_internet_gateway.main_gateway]
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE AND ATTACH A ROUTING TABLE FOR THE PRIVATE NETWORK
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = var.tag_name
+  }
+}
+
+resource "aws_route_table_association" "private" {
+  subnet_id      = aws_subnet.private.id
+  route_table_id = aws_route_table.private.id
+}
+
+
+variables.tf
+
+# ---------------------------------------------------------------------------------------------------------------------
+# ENVIRONMENT VARIABLES
+# Define these secrets as environment variables
+# ---------------------------------------------------------------------------------------------------------------------
+
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+
+# ---------------------------------------------------------------------------------------------------------------------
+# REQUIRED PARAMETERS
+# You must provide a value for each of these parameters.
+# ---------------------------------------------------------------------------------------------------------------------
+
+variable "main_vpc_cidr" {
+  description = "The CIDR of the main VPC"
+  type        = string
+}
+
+variable "public_subnet_cidr" {
+  description = "The CIDR of public subnet"
+  type        = string
+}
+
+variable "private_subnet_cidr" {
+  description = "The CIDR of the private subnet"
+  type        = string
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# OPTIONAL PARAMETERS
+# These parameters have reasonable defaults.
+# ---------------------------------------------------------------------------------------------------------------------
+
+variable "aws_region" {
+  description = "The AWS region to deploy into"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "tag_name" {
+  description = "A name used to tag the resource"
+  type        = string
+  default     = "terraform-network-example"
+}
+
+output.tf
+
+output "main_vpc_id" {
+  value       = aws_vpc.main.id
+  description = "The main VPC id"
+}
+
+output "public_subnet_id" {
+  value       = aws_subnet.public.id
+  description = "The public subnet id"
+}
+
+output "private_subnet_id" {
+  value       = aws_subnet.private.id
+  description = "The private subnet id"
+}

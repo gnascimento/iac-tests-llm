@@ -1,7 +1,11 @@
-
 output "aws_region" {
   description = "The AWS region in use"
-  value       = aws_region.current.name
+  value       = var.region
+}
+
+output "vpc_id" {
+  description = "The ID of the VPC"
+  value       = aws_vpc.main.id  
 }
 
 output "alb_sg_id" {
@@ -58,3 +62,38 @@ output "s3_bucket_policy_id" {
   description = "The ID of the S3 bucket policy"
   value       = aws_s3_bucket_policy.public_read_policy.id
 }
+
+
+output "alb_sg_ingress_rules" {
+  description = "Ingress rules for the ALB security group"
+  value = aws_security_group.alb_sg.ingress
+}
+
+output "alb_sg_egress_rules" {
+  description = "Egress rules for the ALB security group"
+  value = aws_security_group.alb_sg.egress
+}
+
+output "app_sg_ingress_rules_from_http_port" {
+  description = "Ingress rules for the application security group"
+  value = tolist(aws_security_group.app_sg.ingress)[0].from_port
+}
+
+output "app_sg_ingress_rules_to_http_port" {
+  description = "Ingress rules for the application security group"
+  value = tolist(aws_security_group.app_sg.ingress)[0].to_port
+}
+
+
+output "alb_sg_ingress_rules_from_http_port" {
+  description = "Ingress rules for the ALB security group"
+  value = tolist(aws_security_group.alb_sg.ingress)[0].from_port
+}
+
+output "alb_sg_ingress_rules_to_http_port" {
+  description = "Ingress rules for the ALB security group"
+  value = tolist(aws_security_group.alb_sg.ingress)[0].to_port
+}
+
+
+

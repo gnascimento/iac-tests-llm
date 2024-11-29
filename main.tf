@@ -3,19 +3,29 @@ resource "aws_security_group" "alb_sg" {
   name   = "alb_sg"
   vpc_id = aws_vpc.main.id
 
-  ingress {
+  ingress = [{
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
+    description = "HTTP ingress rule"
+    self = false
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    security_groups = []
+  }]
 
-  egress {
+  egress = [{
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
+    description = "HTTP egress rule"
+    self = false
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    security_groups = []
+  }]
 
   depends_on = [aws_vpc.main]
   tags = {
@@ -28,19 +38,29 @@ resource "aws_security_group" "app_sg" {
   name   = "app_sg"
   vpc_id = aws_vpc.main.id
 
-  ingress {
+  ingress = [{
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.alb_sg.id]
-  }
+    description = "HTTP ingress rule"
+    self = false
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    cidr_blocks = []
+  }]
 
-  egress {
+  egress = [{
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
+    description = "HTTP egress rule"
+    self = false
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    security_groups = []
+  }]
 
   tags = {
     Name = "app_sg"

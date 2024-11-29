@@ -1,0 +1,282 @@
+Learn about the following example made with Terratest. Explain it briefly.
+
+
+package test
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
+)
+
+// An example of how to test the Terraform module in examples/terraform-aws-s3-example using Terratest.
+func TestTerraformAwsS3Example(t *testing.T) {
+	t.Parallel()
+
+	// Give this S3 Bucket a unique ID for a name tag so we can distinguish it from any other Buckets provisioned
+	// in your AWS account
+	expectedName := fmt.Sprintf("terratest-aws-s3-example-%s", strings.ToLower(random.UniqueId()))
+
+	// Give this S3 Bucket an environment to operate as a part of for the purposes of resource tagging
+	expectedEnvironment := "Automated Testing"
+
+	// Pick a random AWS region to test in. This helps ensure your code works in all regions.
+	awsRegion := aws.GetRandomStableRegion(t, nil, nil)
+
+	// Construct the terraform options with default retryable errors to handle the most common retryable errors in
+	// terraform testing.
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: "../examples/terraform-aws-s3-example",
+
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"tag_bucket_name":        expectedName,
+			"tag_bucket_environment": expectedEnvironment,
+			"with_policy":            "true",
+			"region":                 awsRegion,
+		},
+	})
+
+	// At the end of the test, run `terraform destroy` to clean up any resources that were created
+	defer terraform.Destroy(t, terraformOptions)
+
+	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Run `terraform output` to get the value of an output variable
+	bucketID := terraform.Output(t, terraformOptions, "bucket_id")
+
+	// Verify that our Bucket has versioning enabled
+	actualStatus := aws.GetS3BucketVersioning(t, awsRegion, bucketID)
+	expectedStatus := "Enabled"
+	assert.Equal(t, expectedStatus, actualStatus)
+
+	// Verify that our Bucket has a policy attached
+	aws.AssertS3BucketPolicyExists(t, awsRegion, bucketID)
+
+	// Verify that our bucket has server access logging TargetBucket set to what's expected
+	loggingTargetBucket := aws.GetS3BucketLoggingTarget(t, awsRegion, bucketID)
+	expectedLogsTargetBucket := fmt.Sprintf("%s-logs", bucketID)
+	loggingObjectTargetPrefix := aws.GetS3BucketLoggingTargetPrefix(t, awsRegion, bucketID)
+	expectedLogsTargetPrefix := "TFStateLogs/"
+
+	assert.Equal(t, expectedLogsTargetBucket, loggingTargetBucket)
+	assert.Equal(t, expectedLogsTargetPrefix, loggingObjectTargetPrefix)
+}
+
+
+
+
+Infrastructure:
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# PIN TERRAFORM VERSION TO >= 0.12
+# The examples have been upgraded to 0.12 syntax
+# ---------------------------------------------------------------------------------------------------------------------
+provider "aws" {
+  region = var.region
+}
+
+terraform {
+  # This module is now only being tested with Terraform 0.13.x. However, to make upgrading easier, we are setting
+  # 0.12.26 as the minimum version, as that version added support for required_providers with source URLs, making it
+  # forwards compatible with 0.13.x code.
+  required_version = ">= 0.12.26"
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      # https://github.com/hashicorp/terraform-provider-aws/issues/33478
+      version = "5.16.0"
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# DEPLOY A S3 BUCKET WITH VERSIONING ENABLED INCLUDING TAGS
+# See test/terraform_aws_s3_example_test.go for how to write automated tests for this code.
+# ---------------------------------------------------------------------------------------------------------------------
+
+# Deploy and configure test S3 bucket with versioning and access log
+resource "aws_s3_bucket" "test_bucket" {
+  bucket = "${local.aws_account_id}-${var.tag_bucket_name}"
+
+  tags = {
+    Name        = var.tag_bucket_name
+    Environment = var.tag_bucket_environment
+  }
+}
+
+resource "aws_s3_bucket_logging" "test_bucket" {
+  bucket        = aws_s3_bucket.test_bucket.id
+  target_bucket = aws_s3_bucket.test_bucket_logs.id
+  target_prefix = "TFStateLogs/"
+}
+
+resource "aws_s3_bucket_versioning" "test_bucket" {
+  bucket = aws_s3_bucket.test_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "test_bucket" {
+  bucket = aws_s3_bucket.test_bucket.id
+  rule {
+    object_ownership = "ObjectWriter"
+  }
+  depends_on = [aws_s3_bucket.test_bucket]
+}
+
+resource "aws_s3_bucket_acl" "test_bucket" {
+  bucket     = aws_s3_bucket.test_bucket.id
+  acl        = "private"
+  depends_on = [aws_s3_bucket_ownership_controls.test_bucket]
+}
+
+
+# Deploy S3 bucket to collect access logs for test bucket
+resource "aws_s3_bucket" "test_bucket_logs" {
+  bucket = "${local.aws_account_id}-${var.tag_bucket_name}-logs"
+
+  tags = {
+    Name        = "${local.aws_account_id}-${var.tag_bucket_name}-logs"
+    Environment = var.tag_bucket_environment
+  }
+
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "test_bucket_logs" {
+  bucket = aws_s3_bucket.test_bucket_logs.id
+  rule {
+    object_ownership = "ObjectWriter"
+  }
+  depends_on = [aws_s3_bucket.test_bucket_logs]
+}
+
+resource "aws_s3_bucket_acl" "test_bucket_logs" {
+  bucket     = aws_s3_bucket.test_bucket_logs.id
+  acl        = "log-delivery-write"
+  depends_on = [aws_s3_bucket_ownership_controls.test_bucket_logs]
+}
+
+# Configure bucket access policies
+
+resource "aws_s3_bucket_policy" "bucket_access_policy" {
+  count  = var.with_policy ? 1 : 0
+  bucket = aws_s3_bucket.test_bucket.id
+  policy = data.aws_iam_policy_document.s3_bucket_policy.json
+}
+
+data "aws_iam_policy_document" "s3_bucket_policy" {
+  statement {
+    effect = "Allow"
+    principals {
+      # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+      # force an interpolation expression to be interpreted as a list by wrapping it
+      # in an extra set of list brackets. That form was supported for compatibility in
+      # v0.11, but is no longer supported in Terraform v0.12.
+      #
+      # If the expression in the following list itself returns a list, remove the
+      # brackets to avoid interpretation as a list of lists. If the expression
+      # returns a single list item then leave it as-is and remove this TODO comment.
+      identifiers = [local.aws_account_id]
+      type        = "AWS"
+    }
+    actions   = ["*"]
+    resources = ["${aws_s3_bucket.test_bucket.arn}/*"]
+  }
+
+  statement {
+    effect = "Deny"
+    principals {
+      identifiers = ["*"]
+      type        = "AWS"
+    }
+    actions   = ["*"]
+    resources = ["${aws_s3_bucket.test_bucket.arn}/*"]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values = [
+        "false",
+      ]
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# LOCALS
+# Used to represent any data that requires complex expressions/interpolations
+# ---------------------------------------------------------------------------------------------------------------------
+
+data "aws_caller_identity" "current" {
+}
+
+locals {
+  aws_account_id = data.aws_caller_identity.current.account_id
+}
+
+output "bucket_id" {
+  value = aws_s3_bucket.test_bucket.id
+}
+
+output "bucket_arn" {
+  value = aws_s3_bucket.test_bucket.arn
+}
+
+output "logging_target_bucket" {
+  value = aws_s3_bucket_logging.test_bucket.target_bucket
+}
+
+output "logging_target_prefix" {
+  value = aws_s3_bucket_logging.test_bucket.target_prefix
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# ENVIRONMENT VARIABLES
+# Define these secrets as environment variables
+# ---------------------------------------------------------------------------------------------------------------------
+
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+
+# ---------------------------------------------------------------------------------------------------------------------
+# REQUIRED PARAMETERS
+# You must provide a value for each of these parameters.
+# ---------------------------------------------------------------------------------------------------------------------
+variable "region" {
+  description = "The AWS region to deploy to"
+  type        = string
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# OPTIONAL PARAMETERS
+# These parameters have reasonable defaults.
+# ---------------------------------------------------------------------------------------------------------------------
+
+variable "with_policy" {
+  description = "If set to `true`, the bucket will be created with a bucket policy."
+  type        = bool
+  default     = false
+}
+
+variable "tag_bucket_name" {
+  description = "The Name tag to set for the S3 Bucket."
+  type        = string
+  default     = "Test Bucket"
+}
+
+variable "tag_bucket_environment" {
+  description = "The Environment tag to set for the S3 Bucket."
+  type        = string
+  default     = "Test"
+}

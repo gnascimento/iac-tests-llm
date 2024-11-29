@@ -1,0 +1,5 @@
+Based on the previous examples, develop the Terratest tests for the infrastructure in the attached files iam.tf, main.tf, provider.tf, vpc.tf, outputs.tf and vars.tf.
+Perform validations over the outputs provided in outputs.tf.
+Generate only the tests, don't be verbose. Be restrict to functions existing on the gruntwork aws module.
+
+

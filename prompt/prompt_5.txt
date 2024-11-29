@@ -1,0 +1,357 @@
+These are ALL the functions and types you can use on terratest AWS module
+
+"github.com/gruntwork-io/terratest/modules/aws"
+
+
+Package aws allows to interact with resources on Amazon Web Services.
+
+
+func AddTagsToResource(t testing.TestingT, region string, resource string, tags map[string]string)
+func AddTagsToResourceE(t testing.TestingT, region string, resource string, tags map[string]string) error
+func AssertS3BucketExists(t testing.TestingT, region string, name string)
+func AssertS3BucketExistsE(t testing.TestingT, region string, name string) error
+func AssertS3BucketPolicyExists(t testing.TestingT, region string, bucketName string)
+func AssertS3BucketPolicyExistsE(t testing.TestingT, region string, bucketName string) error
+func AssertS3BucketVersioningExists(t testing.TestingT, region string, bucketName string)
+func AssertS3BucketVersioningExistsE(t testing.TestingT, region string, bucketName string) error
+func AssumeRole(sess *session.Session, roleARN string) *session.Session
+func CreateAwsCredentials(accessKeyID string, secretAccessKey string) *credentials.Credentials
+func CreateAwsCredentialsWithSessionToken(accessKeyID, secretAccessKey, sessionToken string) *credentials.Credentials
+func CreateAwsSessionFromRole(region string, roleARN string) (*session.Session, error)
+func CreateAwsSessionWithCreds(region string, accessKeyID string, secretAccessKey string) (*session.Session, error)
+func CreateAwsSessionWithMfa(region string, stsClient *sts.STS, mfaDevice *iam.VirtualMFADevice) (*session.Session, error)
+func CreateECRRepo(t testing.TestingT, region string, name string) *ecr.Repository
+func CreateECRRepoE(t testing.TestingT, region string, name string) (*ecr.Repository, error)
+func CreateEcsCluster(t testing.TestingT, region string, name string) *ecs.Cluster
+func CreateEcsClusterE(t testing.TestingT, region string, name string) (*ecs.Cluster, error)
+func CreateMfaDevice(t testing.TestingT, iamClient *iam.IAM, deviceName string) *iam.VirtualMFADevice
+func CreateMfaDeviceE(t testing.TestingT, iamClient *iam.IAM, deviceName string) (*iam.VirtualMFADevice, error)
+func CreateRandomFifoQueue(t testing.TestingT, awsRegion string, prefix string) string
+func CreateRandomFifoQueueE(t testing.TestingT, awsRegion string, prefix string) (string, error)
+func CreateRandomQueue(t testing.TestingT, awsRegion string, prefix string) string
+func CreateRandomQueueE(t testing.TestingT, awsRegion string, prefix string) (string, error)
+func CreateS3Bucket(t testing.TestingT, region string, name string)
+func CreateS3BucketE(t testing.TestingT, region string, name string) error
+func CreateSecretStringWithDefaultKey(t testing.TestingT, awsRegion, description, name, secretString string) string
+func CreateSecretStringWithDefaultKeyE(t testing.TestingT, awsRegion, description, name, secretString string) (string, error)
+func CreateSnsTopic(t testing.TestingT, region string, snsTopicName string) string
+func CreateSnsTopicE(t testing.TestingT, region string, snsTopicName string) (string, error)
+func DeleteAmi(t testing.TestingT, region string, imageID string)
+func DeleteAmiAndAllSnapshots(t testing.TestingT, region string, ami string)
+func DeleteAmiAndAllSnapshotsE(t testing.TestingT, region string, ami string) error
+func DeleteAmiE(t testing.TestingT, region string, imageID string) error
+func DeleteEC2KeyPair(t testing.TestingT, keyPair *Ec2Keypair)
+func DeleteEC2KeyPairE(t testing.TestingT, keyPair *Ec2Keypair) error
+func DeleteECRRepo(t testing.TestingT, region string, repo *ecr.Repository)
+func DeleteECRRepoE(t testing.TestingT, region string, repo *ecr.Repository) error
+func DeleteEbsSnapshot(t testing.TestingT, region string, snapshot string)
+func DeleteEbsSnapshotE(t testing.TestingT, region string, snapshot string) error
+func DeleteEcsCluster(t testing.TestingT, region string, cluster *ecs.Cluster)
+func DeleteEcsClusterE(t testing.TestingT, region string, cluster *ecs.Cluster) error
+func DeleteMessageFromQueue(t testing.TestingT, awsRegion string, queueURL string, receipt string)
+func DeleteMessageFromQueueE(t testing.TestingT, awsRegion string, queueURL string, receipt string) error
+func DeleteParameter(t testing.TestingT, awsRegion string, keyName string)
+func DeleteParameterE(t testing.TestingT, awsRegion string, keyName string) error
+func DeleteParameterWithClientE(t testing.TestingT, client *ssm.SSM, keyName string) error
+func DeleteQueue(t testing.TestingT, awsRegion string, queueURL string)
+func DeleteQueueE(t testing.TestingT, awsRegion string, queueURL string) error
+func DeleteS3Bucket(t testing.TestingT, region string, name string)
+func DeleteS3BucketE(t testing.TestingT, region string, name string) error
+func DeleteSNSTopic(t testing.TestingT, region string, snsTopicArn string)
+func DeleteSNSTopicE(t testing.TestingT, region string, snsTopicArn string) error
+func DeleteSecret(t testing.TestingT, awsRegion, id string, forceDelete bool)
+func DeleteSecretE(t testing.TestingT, awsRegion, id string, forceDelete bool) error
+func EmptyS3Bucket(t testing.TestingT, region string, name string)
+func EmptyS3BucketE(t testing.TestingT, region string, name string) error
+func EnableMfaDevice(t testing.TestingT, iamClient *iam.IAM, mfaDevice *iam.VirtualMFADevice)
+func EnableMfaDeviceE(t testing.TestingT, iamClient *iam.IAM, mfaDevice *iam.VirtualMFADevice) error
+func FetchContentsOfFileFromAsg(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) map[string]string
+func FetchContentsOfFileFromAsgE(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) (map[string]string, error)
+func FetchContentsOfFileFromInstance(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) string
+func FetchContentsOfFileFromInstanceE(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) (string, error)
+func FetchContentsOfFilesFromAsg(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) map[string]map[string]string
+func FetchContentsOfFilesFromAsgE(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) (map[string]map[string]string, error)
+func FetchContentsOfFilesFromInstance(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) map[string]string
+func FetchContentsOfFilesFromInstanceE(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) (map[string]string, error)
+func FetchFilesFromAsgs(t testing.TestingT, awsRegion string, spec RemoteFileSpecification)
+func FetchFilesFromAsgsE(t testing.TestingT, awsRegion string, spec RemoteFileSpecification) error
+func FetchFilesFromInstance(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...)
+func FetchFilesFromInstanceE(t testing.TestingT, awsRegion string, sshUserName string, keyPair *Ec2Keypair, ...) error
+func FindS3BucketWithTag(t testing.TestingT, awsRegion string, key string, value string) string
+func FindS3BucketWithTagE(t testing.TestingT, awsRegion string, key string, value string) (string, error)
+func FindVpcName(vpc *ec2.Vpc) string
+func GetAccountId(t testing.TestingT) string
+func GetAccountIdE(t testing.TestingT) (string, error)
+func GetAccountsWithLaunchPermissionsForAmi(t testing.TestingT, awsRegion string, amiID string) []string
+func GetAccountsWithLaunchPermissionsForAmiE(t testing.TestingT, awsRegion string, amiID string) ([]string, error)
+func GetAcmCertificateArn(t testing.TestingT, awsRegion string, certDomainName string) string
+func GetAcmCertificateArnE(t testing.TestingT, awsRegion string, certDomainName string) (string, error)
+func GetAddressOfRdsInstance(t testing.TestingT, dbInstanceID string, awsRegion string) string
+func GetAddressOfRdsInstanceE(t testing.TestingT, dbInstanceID string, awsRegion string) (string, error)
+func GetAllAwsRegions(t testing.TestingT) []string
+func GetAllAwsRegionsE(t testing.TestingT) ([]string, error)
+func GetAllParametersOfRdsInstance(t testing.TestingT, dbInstanceID string, awsRegion string) []*rds.Parameter
+func GetAllParametersOfRdsInstanceE(t testing.TestingT, dbInstanceID string, awsRegion string) ([]*rds.Parameter, error)
+func GetAmazonLinuxAmi(t testing.TestingT, region string) string
+func GetAmazonLinuxAmiE(t testing.TestingT, region string) (string, error)
+func GetAmiPubliclyAccessible(t testing.TestingT, awsRegion string, amiID string) bool
+func GetAmiPubliclyAccessibleE(t testing.TestingT, awsRegion string, amiID string) (bool, error)
+func GetAvailabilityZones(t testing.TestingT, region string) []string
+func GetAvailabilityZonesE(t testing.TestingT, region string) ([]string, error)
+func GetCentos7Ami(t testing.TestingT, region string) string
+func GetCentos7AmiE(t testing.TestingT, region string) (string, error)
+func GetCloudWatchLogEntries(t testing.TestingT, awsRegion string, logStreamName string, ...) []string
+func GetCloudWatchLogEntriesE(t testing.TestingT, awsRegion string, logStreamName string, ...) ([]string, error)
+func GetCmkArn(t testing.TestingT, region string, cmkID string) string
+func GetCmkArnE(t testing.TestingT, region string, cmkID string) (string, error)
+func GetDefaultEcsCluster(t testing.TestingT, region string) *ecs.Cluster
+func GetDefaultEcsClusterE(t testing.TestingT, region string) (*ecs.Cluster, error)
+func GetDefaultSubnetIDsForVpc(t testing.TestingT, vpc Vpc) []string
+func GetDefaultSubnetIDsForVpcE(t testing.TestingT, vpc Vpc) ([]string, error)
+func GetDynamoDBTable(t testing.TestingT, region string, tableName string) *dynamodb.TableDescription
+func GetDynamoDBTableE(t testing.TestingT, region string, tableName string) (*dynamodb.TableDescription, error)
+func GetDynamoDBTableTimeToLive(t testing.TestingT, region string, tableName string) *dynamodb.TimeToLiveDescription
+func GetDynamoDBTableTimeToLiveE(t testing.TestingT, region string, tableName string) (*dynamodb.TimeToLiveDescription, error)
+func GetDynamoDbTableTags(t testing.TestingT, region string, tableName string) []*dynamodb.Tag
+func GetDynamoDbTableTagsE(t testing.TestingT, region string, tableName string) ([]*dynamodb.Tag, error)
+func GetECRRepo(t testing.TestingT, region string, name string) *ecr.Repository
+func GetECRRepoE(t testing.TestingT, region string, name string) (*ecr.Repository, error)
+func GetECRRepoLifecyclePolicy(t testing.TestingT, region string, repo *ecr.Repository) string
+func GetECRRepoLifecyclePolicyE(t testing.TestingT, region string, repo *ecr.Repository) (string, error)
+func GetEbsSnapshotsForAmi(t testing.TestingT, region string, ami string) []string
+func GetEbsSnapshotsForAmiE(t testing.TestingT, region string, ami string) ([]string, error)
+func GetEc2InstanceIdsByFilters(t testing.TestingT, region string, ec2Filters map[string][]string) []string
+func GetEc2InstanceIdsByFiltersE(t testing.TestingT, region string, ec2Filters map[string][]string) ([]string, error)
+func GetEc2InstanceIdsByTag(t testing.TestingT, region string, tagName string, tagValue string) []string
+func GetEc2InstanceIdsByTagE(t testing.TestingT, region string, tagName string, tagValue string) ([]string, error)
+func GetEcsCluster(t testing.TestingT, region string, name string) *ecs.Cluster
+func GetEcsClusterE(t testing.TestingT, region string, name string) (*ecs.Cluster, error)
+func GetEcsClusterWithInclude(t testing.TestingT, region string, name string, include []string) *ecs.Cluster
+func GetEcsClusterWithIncludeE(t testing.TestingT, region string, name string, include []string) (*ecs.Cluster, error)
+func GetEcsOptimizedAmazonLinuxAmi(t testing.TestingT, region string) string
+func GetEcsOptimizedAmazonLinuxAmiE(t testing.TestingT, region string) (string, error)
+func GetEcsService(t testing.TestingT, region string, clusterName string, serviceName string) *ecs.Service
+func GetEcsServiceE(t testing.TestingT, region string, clusterName string, serviceName string) (*ecs.Service, error)
+func GetEcsTaskDefinition(t testing.TestingT, region string, taskDefinition string) *ecs.TaskDefinition
+func GetEcsTaskDefinitionE(t testing.TestingT, region string, taskDefinition string) (*ecs.TaskDefinition, error)
+func GetFirstTwoOctets(cidrBlock string) string
+func GetIamCurrentUserArn(t testing.TestingT) string
+func GetIamCurrentUserArnE(t testing.TestingT) (string, error)
+func GetIamCurrentUserName(t testing.TestingT) string
+func GetIamCurrentUserNameE(t testing.TestingT) (string, error)
+func GetInstanceIdsForAsg(t testing.TestingT, asgName string, awsRegion string) []string
+func GetInstanceIdsForAsgE(t testing.TestingT, asgName string, awsRegion string) ([]string, error)
+func GetLaunchPermissionsForAmiE(t testing.TestingT, awsRegion string, amiID string) ([]*ec2.LaunchPermission, error)
+func GetMostRecentAmiId(t testing.TestingT, region string, ownerId string, filters map[string][]string) string
+func GetMostRecentAmiIdE(t testing.TestingT, region string, ownerId string, filters map[string][]string) (string, error)
+func GetOptionGroupNameOfRdsInstance(t testing.TestingT, dbInstanceID string, awsRegion string) string
+func GetOptionGroupNameOfRdsInstanceE(t testing.TestingT, dbInstanceID string, awsRegion string) (string, error)
+func GetOptionSettingForOfRdsInstance(t testing.TestingT, optionName string, optionSettingName string, ...) string
+func GetOptionSettingForOfRdsInstanceE(t testing.TestingT, optionName string, optionSettingName string, ...) (string, error)
+func GetOptionsOfOptionGroup(t testing.TestingT, optionGroupName string, awsRegion string) []*rds.Option
+func GetOptionsOfOptionGroupE(t testing.TestingT, optionGroupName string, awsRegion string) ([]*rds.Option, error)
+func GetParameter(t testing.TestingT, awsRegion string, keyName string) string
+func GetParameterE(t testing.TestingT, awsRegion string, keyName string) (string, error)
+func GetParameterValueForParameterOfRdsInstance(t testing.TestingT, parameterName string, dbInstanceID string, ...) string
+func GetParameterValueForParameterOfRdsInstanceE(t testing.TestingT, parameterName string, dbInstanceID string, ...) (string, error)
+func GetParameterWithClientE(t testing.TestingT, client *ssm.SSM, keyName string) (string, error)
+func GetPortOfRdsInstance(t testing.TestingT, dbInstanceID string, awsRegion string) int64
+func GetPortOfRdsInstanceE(t testing.TestingT, dbInstanceID string, awsRegion string) (int64, error)
+func GetPrivateHostnameOfEc2Instance(t testing.TestingT, instanceID string, awsRegion string) string
+func GetPrivateHostnameOfEc2InstanceE(t testing.TestingT, instanceID string, awsRegion string) (string, error)
+func GetPrivateHostnamesOfEc2Instances(t testing.TestingT, instanceIDs []string, awsRegion string) map[string]string
+func GetPrivateHostnamesOfEc2InstancesE(t testing.TestingT, instanceIDs []string, awsRegion string) (map[string]string, error)
+func GetPrivateIpOfEc2Instance(t testing.TestingT, instanceID string, awsRegion string) string
+func GetPrivateIpOfEc2InstanceE(t testing.TestingT, instanceID string, awsRegion string) (string, error)
+func GetPrivateIpsOfEc2Instances(t testing.TestingT, instanceIDs []string, awsRegion string) map[string]string
+func GetPrivateIpsOfEc2InstancesE(t testing.TestingT, instanceIDs []string, awsRegion string) (map[string]string, error)
+func GetPublicIpOfEc2Instance(t testing.TestingT, instanceID string, awsRegion string) string
+func GetPublicIpOfEc2InstanceE(t testing.TestingT, instanceID string, awsRegion string) (string, error)
+func GetPublicIpsOfEc2Instances(t testing.TestingT, instanceIDs []string, awsRegion string) map[string]string
+func GetPublicIpsOfEc2InstancesE(t testing.TestingT, instanceIDs []string, awsRegion string) (map[string]string, error)
+func GetRandomPrivateCidrBlock(routingPrefix int) string
+func GetRandomRegion(t testing.TestingT, approvedRegions []string, forbiddenRegions []string) string
+func GetRandomRegionE(t testing.TestingT, approvedRegions []string, forbiddenRegions []string) (string, error)
+func GetRandomRegionForService(t testing.TestingT, serviceName string) string
+func GetRandomStableRegion(t testing.TestingT, approvedRegions []string, forbiddenRegions []string) string
+func GetRdsInstanceDetailsE(t testing.TestingT, dbInstanceID string, awsRegion string) (*rds.DBInstance, error)
+func GetRecommendedInstanceType(t testing.TestingT, region string, instanceTypeOptions []string) string
+func GetRecommendedInstanceTypeE(t testing.TestingT, region string, instanceTypeOptions []string) (string, error)
+func GetRecommendedInstanceTypeWithClientE(t testing.TestingT, ec2Client *ec2.EC2, instanceTypeOptions []string) (string, error)
+func GetRecommendedRdsInstanceType(t testing.TestingT, region string, engine string, engineVersion string, ...) string
+func GetRecommendedRdsInstanceTypeE(t testing.TestingT, region string, engine string, engineVersion string, ...) (string, error)
+func GetRecommendedRdsInstanceTypeWithClientE(t testing.TestingT, rdsClient *rds.RDS, engine string, engineVersion string, ...) (string, error)
+func GetRegionsForService(t testing.TestingT, serviceName string) []string
+func GetRegionsForServiceE(t testing.TestingT, serviceName string) ([]string, error)
+func GetRoute53Record(t *testing.T, hostedZoneID, recordName, recordType, awsRegion string) *route53.ResourceRecordSet
+func GetRoute53RecordE(t *testing.T, hostedZoneID, recordName, recordType, awsRegion string) (record *route53.ResourceRecordSet, err error)
+func GetS3BucketLoggingTarget(t testing.TestingT, awsRegion string, bucket string) string
+func GetS3BucketLoggingTargetE(t testing.TestingT, awsRegion string, bucket string) (string, error)
+func GetS3BucketLoggingTargetPrefix(t testing.TestingT, awsRegion string, bucket string) string
+func GetS3BucketLoggingTargetPrefixE(t testing.TestingT, awsRegion string, bucket string) (string, error)
+func GetS3BucketPolicy(t testing.TestingT, awsRegion string, bucket string) string
+func GetS3BucketPolicyE(t testing.TestingT, awsRegion string, bucket string) (string, error)
+func GetS3BucketTags(t testing.TestingT, awsRegion string, bucket string) map[string]string
+func GetS3BucketTagsE(t testing.TestingT, awsRegion string, bucket string) (map[string]string, error)
+func GetS3BucketVersioning(t testing.TestingT, awsRegion string, bucket string) string
+func GetS3BucketVersioningE(t testing.TestingT, awsRegion string, bucket string) (string, error)
+func GetS3ObjectContents(t testing.TestingT, awsRegion string, bucket string, key string) string
+func GetS3ObjectContentsE(t testing.TestingT, awsRegion string, bucket string, key string) (string, error)
+func GetSecretValue(t testing.TestingT, awsRegion, id string) string
+func GetSecretValueE(t testing.TestingT, awsRegion, id string) (string, error)
+func GetSyslogForInstance(t testing.TestingT, instanceID string, awsRegion string) string
+func GetSyslogForInstanceE(t testing.TestingT, instanceID string, region string) (string, error)
+func GetSyslogForInstancesInAsg(t testing.TestingT, asgName string, awsRegion string) map[string]string
+func GetSyslogForInstancesInAsgE(t testing.TestingT, asgName string, awsRegion string) (map[string]string, error)
+func GetTagsForEc2Instance(t testing.TestingT, region string, instanceID string) map[string]string
+func GetTagsForEc2InstanceE(t testing.TestingT, region string, instanceID string) (map[string]string, error)
+func GetTagsForSubnet(t testing.TestingT, subnetId string, region string) map[string]string
+func GetTagsForSubnetE(t testing.TestingT, subnetId string, region string) (map[string]string, error)
+func GetTagsForVpc(t testing.TestingT, vpcID string, region string) map[string]string
+func GetTagsForVpcE(t testing.TestingT, vpcID string, region string) (map[string]string, error)
+func GetTimeBasedOneTimePassword(mfaDevice *iam.VirtualMFADevice) (string, error)
+func GetUbuntu1404Ami(t testing.TestingT, region string) string
+func GetUbuntu1404AmiE(t testing.TestingT, region string) (string, error)
+func GetUbuntu1604Ami(t testing.TestingT, region string) string
+func GetUbuntu1604AmiE(t testing.TestingT, region string) (string, error)
+func GetUbuntu2004Ami(t testing.TestingT, region string) string
+func GetUbuntu2004AmiE(t testing.TestingT, region string) (string, error)
+func GetUbuntu2204Ami(t testing.TestingT, region string) string
+func GetUbuntu2204AmiE(t testing.TestingT, region string) (string, error)
+func GetValidEngineVersion(t testing.TestingT, region string, engine string, majorVersion string) string
+func GetValidEngineVersionE(t testing.TestingT, region string, engine string, majorVersion string) (string, error)
+func GetWhetherSchemaExistsInRdsMySqlInstance(t testing.TestingT, dbUrl string, dbPort int64, dbUsername string, ...) bool
+func GetWhetherSchemaExistsInRdsMySqlInstanceE(t testing.TestingT, dbUrl string, dbPort int64, dbUsername string, ...) (bool, error)
+func InvokeFunction(t testing.TestingT, region, functionName string, payload interface{}) []byte
+func InvokeFunctionE(t testing.TestingT, region, functionName string, payload interface{}) ([]byte, error)
+func IsPublicSubnet(t testing.TestingT, subnetId string, region string) bool
+func IsPublicSubnetE(t testing.TestingT, subnetId string, region string) (bool, error)
+func NewAcmClient(t testing.TestingT, region string) *acm.ACM
+func NewAcmClientE(t testing.TestingT, awsRegion string) (*acm.ACM, error)
+func NewAsgClient(t testing.TestingT, region string) *autoscaling.AutoScaling
+func NewAsgClientE(t testing.TestingT, region string) (*autoscaling.AutoScaling, error)
+func NewAuthenticatedSession(region string) (*session.Session, error)
+func NewAuthenticatedSessionFromDefaultCredentials(region string) (*session.Session, error)
+func NewAuthenticatedSessionFromRole(region string, roleARN string) (*session.Session, error)
+func NewCloudWatchLogsClient(t testing.TestingT, region string) *cloudwatchlogs.CloudWatchLogs
+func NewCloudWatchLogsClientE(t testing.TestingT, region string) (*cloudwatchlogs.CloudWatchLogs, error)
+func NewDynamoDBClient(t testing.TestingT, region string) *dynamodb.DynamoDB
+func NewDynamoDBClientE(t testing.TestingT, region string) (*dynamodb.DynamoDB, error)
+func NewECRClient(t testing.TestingT, region string) *ecr.ECR
+func NewECRClientE(t testing.TestingT, region string) (*ecr.ECR, error)
+func NewEc2Client(t testing.TestingT, region string) *ec2.EC2
+func NewEc2ClientE(t testing.TestingT, region string) (*ec2.EC2, error)
+func NewEcsClient(t testing.TestingT, region string) *ecs.ECS
+func NewEcsClientE(t testing.TestingT, region string) (*ecs.ECS, error)
+func NewIamClient(t testing.TestingT, region string) *iam.IAM
+func NewIamClientE(t testing.TestingT, region string) (*iam.IAM, error)
+func NewKmsClient(t testing.TestingT, region string) *kms.KMS
+func NewKmsClientE(t testing.TestingT, region string) (*kms.KMS, error)
+func NewLambdaClient(t testing.TestingT, region string) *lambda.Lambda
+func NewLambdaClientE(t testing.TestingT, region string) (*lambda.Lambda, error)
+func NewRdsClient(t testing.TestingT, region string) *rds.RDS
+func NewRdsClientE(t testing.TestingT, region string) (*rds.RDS, error)
+func NewRoute53Client(t *testing.T, region string) *route53.Route53
+func NewRoute53ClientE(t *testing.T, region string) (*route53.Route53, error)
+func NewS3Client(t testing.TestingT, region string) *s3.S3
+func NewS3ClientE(t testing.TestingT, region string) (*s3.S3, error)
+func NewS3Uploader(t testing.TestingT, region string) *s3manager.Uploader
+func NewS3UploaderE(t testing.TestingT, region string) (*s3manager.Uploader, error)
+func NewSecretsManagerClient(t testing.TestingT, region string) *secretsmanager.SecretsManager
+func NewSecretsManagerClientE(t testing.TestingT, region string) (*secretsmanager.SecretsManager, error)
+func NewSnsClient(t testing.TestingT, region string) *sns.SNS
+func NewSnsClientE(t testing.TestingT, region string) (*sns.SNS, error)
+func NewSqsClient(t testing.TestingT, region string) *sqs.SQS
+func NewSqsClientE(t testing.TestingT, region string) (*sqs.SQS, error)
+func NewSsmClient(t testing.TestingT, region string) *ssm.SSM
+func NewSsmClientE(t testing.TestingT, region string) (*ssm.SSM, error)
+func NewStsClientE(t testing.TestingT, region string) (*sts.STS, error)
+func PutECRRepoLifecyclePolicy(t testing.TestingT, region string, repo *ecr.Repository, policy string)
+func PutECRRepoLifecyclePolicyE(t testing.TestingT, region string, repo *ecr.Repository, policy string) error
+func PutParameter(t testing.TestingT, awsRegion string, keyName string, keyDescription string, ...) int64
+func PutParameterE(t testing.TestingT, awsRegion string, keyName string, keyDescription string, ...) (int64, error)
+func PutParameterWithClientE(t testing.TestingT, client *ssm.SSM, keyName string, keyDescription string, ...) (int64, error)
+func PutS3BucketPolicy(t testing.TestingT, region string, bucketName string, policyJSONString string)
+func PutS3BucketPolicyE(t testing.TestingT, region string, bucketName string, policyJSONString string) error
+func PutS3BucketVersioning(t testing.TestingT, region string, bucketName string)
+func PutS3BucketVersioningE(t testing.TestingT, region string, bucketName string) error
+func ReadPasswordPolicyMinPasswordLength(iamClient *iam.IAM) (int, error)
+func SendMessageFifoToQueue(t testing.TestingT, awsRegion string, queueURL string, message string, ...)
+func SendMessageToFifoQueueE(t testing.TestingT, awsRegion string, queueURL string, message string, ...) error
+func SendMessageToQueue(t testing.TestingT, awsRegion string, queueURL string, message string)
+func SendMessageToQueueE(t testing.TestingT, awsRegion string, queueURL string, message string) error
+func TerminateInstance(t testing.TestingT, region string, instanceID string)
+func TerminateInstanceE(t testing.TestingT, region string, instanceID string) error
+func WaitForCapacity(t testing.TestingT, asgName string, region string, maxRetries int, ...)
+func WaitForCapacityE(t testing.TestingT, asgName string, region string, maxRetries int, ...) error
+func WaitForSsmInstance(t testing.TestingT, awsRegion, instanceID string, timeout time.Duration)
+func WaitForSsmInstanceE(t testing.TestingT, awsRegion, instanceID string, timeout time.Duration) error
+func WaitForSsmInstanceWithClientE(t testing.TestingT, client *ssm.SSM, instanceID string, timeout time.Duration) error
+type AsgCapacityInfo
+func GetCapacityInfoForAsg(t testing.TestingT, asgName string, awsRegion string) AsgCapacityInfo
+func GetCapacityInfoForAsgE(t testing.TestingT, asgName string, awsRegion string) (AsgCapacityInfo, error)
+type AsgCapacityNotMetError
+func NewAsgCapacityNotMetError(asgName string, desiredCapacity int64, currentCapacity int64) AsgCapacityNotMetError
+func (err AsgCapacityNotMetError) Error() string
+type BucketVersioningNotEnabledError
+func NewBucketVersioningNotEnabledError(s3BucketName string, awsRegion string, versioningStatus string) BucketVersioningNotEnabledError
+func (err BucketVersioningNotEnabledError) Error() string
+type CommandOutput
+func CheckSSMCommandWithClientE(t testing.TestingT, client *ssm.SSM, instanceID, command string, ...) (*CommandOutput, error)
+func CheckSSMCommandWithClientWithDocumentE(t testing.TestingT, client *ssm.SSM, instanceID, command string, ...) (*CommandOutput, error)
+func CheckSsmCommand(t testing.TestingT, awsRegion, instanceID, command string, ...) *CommandOutput
+func CheckSsmCommandE(t testing.TestingT, awsRegion, instanceID, command string, ...) (*CommandOutput, error)
+func CheckSsmCommandWithDocument(t testing.TestingT, awsRegion, instanceID, command string, ...) *CommandOutput
+func CheckSsmCommandWithDocumentE(t testing.TestingT, awsRegion, instanceID, command string, ...) (*CommandOutput, error)
+type CredentialsError
+func (err CredentialsError) Error() string
+type Ec2Keypair
+func CreateAndImportEC2KeyPair(t testing.TestingT, region string, name string) *Ec2Keypair
+func CreateAndImportEC2KeyPairE(t testing.TestingT, region string, name string) (*Ec2Keypair, error)
+func ImportEC2KeyPair(t testing.TestingT, region string, name string, keyPair *ssh.KeyPair) *Ec2Keypair
+func ImportEC2KeyPairE(t testing.TestingT, region string, name string, keyPair *ssh.KeyPair) (*Ec2Keypair, error)
+type FunctionError
+func (err *FunctionError) Error() string
+type HostnameForEc2InstanceNotFound
+func (err HostnameForEc2InstanceNotFound) Error() string
+type InvocationTypeOption
+func (itype *InvocationTypeOption) Value() (string, error)
+type IpForEc2InstanceNotFound
+func (err IpForEc2InstanceNotFound) Error() string
+type LambdaOptions
+type LambdaOutput
+func InvokeFunctionWithParams(t testing.TestingT, region, functionName string, input *LambdaOptions) *LambdaOutput
+func InvokeFunctionWithParamsE(t testing.TestingT, region, functionName string, input *LambdaOptions) (*LambdaOutput, error)
+type NoBucketPolicyError
+func NewNoBucketPolicyError(s3BucketName string, awsRegion string, bucketPolicy string) NoBucketPolicyError
+func (err NoBucketPolicyError) Error() string
+type NoImagesFound
+func (err NoImagesFound) Error() string
+type NoInstanceTypeError
+func (err NoInstanceTypeError) Error() string
+type NoRdsInstanceTypeError
+func (err NoRdsInstanceTypeError) Error() string
+type NotFoundError
+func NewNotFoundError(objectType string, objectID string, region string) NotFoundError
+func (err NotFoundError) Error() string
+type OptionGroupOptionSettingForDbInstanceNotFound
+func (err OptionGroupOptionSettingForDbInstanceNotFound) Error() string
+type ParameterForDbInstanceNotFound
+func (err ParameterForDbInstanceNotFound) Error() string
+type QueueMessageResponse
+func WaitForQueueMessage(t testing.TestingT, awsRegion string, queueURL string, timeout int) QueueMessageResponse
+type ReceiveMessageTimeout
+func (err ReceiveMessageTimeout) Error() string
+type RemoteFileSpecification
+type S3AccessLoggingNotEnabledErr
+func (err S3AccessLoggingNotEnabledErr) Error() string
+type Subnet
+func GetAzDefaultSubnetsForVpc(t testing.TestingT, vpcID string, region string) []Subnet
+func GetSubnetsForVpc(t testing.TestingT, vpcID string, region string) []Subnet
+func GetSubnetsForVpcE(t testing.TestingT, region string, filters []*ec2.Filter) ([]Subnet, error)
+type Vpc
+func GetDefaultVpc(t testing.TestingT, region string) *Vpc
+func GetDefaultVpcE(t testing.TestingT, region string) (*Vpc, error)
+func GetVpcById(t testing.TestingT, vpcId string, region string) *Vpc
+func GetVpcByIdE(t testing.TestingT, vpcId string, region string) (*Vpc, error)
+func GetVpcsE(t testing.TestingT, filters []*ec2.Filter, region string) ([]*Vpc, error)
